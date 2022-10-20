@@ -198,11 +198,12 @@ class Parser:
         if_depth = 0
         if_true_bmp = 1  # bitmap for every #if statement
         if_done_bmp = 1  # bitmap for every #if statement
-        first_guard_token = True
         is_block_comment = False
         # with open(filepath, "r", errors="replace") as fs:
         multi_lines = ""
         for line_no, line in enumerate(fileio.readlines(), 1):
+
+            line = REGEX_SYNTAX_LINE_COMMENT.sub("", self.strip_token(line, reserve_whitespace))
 
             if not is_block_comment:
                 if "/*" in line:  # start of block comment
@@ -224,8 +225,6 @@ class Parser:
                         yield (line, line_no)
                     continue
 
-            line = REGEX_SYNTAX_LINE_COMMENT.sub("", self.strip_token(line, reserve_whitespace))
-
             if try_if_else:
                 match_if = REG_STATEMENT_IF.match(line)
                 match_elif = REG_STATEMENT_ELIF.match(line)
@@ -240,14 +239,18 @@ class Parser:
                         if_token = (
                             if_tokens[0].name if len(if_tokens) == 1 else "<unknown>"
                         )
-                        if (
-                            ignore_header_guard
-                            and first_guard_token
-                            and (match_if.group("NOT") == "n")
-                        ):
-                            if_token_val = 0  # header guard always uses #ifndef *
+                        if if_token in self.defs:
+                            if not ignore_header_guard:
+                                if_token_val = 1
+                            else:
+                                defined_file = self.defs[if_token].file
+                                defined_line = self.defs[if_token].lineno
+                                if os.path.samefile(defined_file, fileio.name) and line_no < defined_line:
+                                    if_token_val = 0
+                                else:
+                                    if_token_val = 1
                         else:
-                            if_token_val = if_token in self.defs
+                            if_token_val = 0
                     else:
                         if_token = self.expand_token(
                             token,
@@ -258,9 +261,6 @@ class Parser:
                         if_token_val = bool(self.try_eval_num(if_token))
                     if_true_bmp |= BIT(if_depth) * (
                         if_token_val ^ (match_if.group("NOT") == "n")
-                    )
-                    first_guard_token = (
-                        False if match_if.group("NOT") == "n" else first_guard_token
                     )
                 elif match_elif:
                     if_token = self.expand_token(
