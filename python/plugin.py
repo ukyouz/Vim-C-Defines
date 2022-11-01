@@ -148,7 +148,7 @@ def _mark_inactive_code(buffer):
     fileio.name = filename
     for _, lineno in p.read_file_lines(
         fileio,
-        reserve_whitespace=True,
+        reserve_whitespace=False,
         ignore_header_guard=True,
         include_block_comment=True,
     ):

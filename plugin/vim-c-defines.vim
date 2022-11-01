@@ -27,6 +27,12 @@ endfunction
 
 command! -bang -nargs=0 CdfRebuild call CdfRebuild()
 
+function! CdfRefreshBuffer()
+  python3 plugin.command_mark_inactive_code()
+endfunction
+
+command! -bang -nargs=0 CdfRebuild call CdfRefreshBuffer()
+
 "  function! CdfTest()
 "    python3 plugin.command_mark_inactive_code()
 "  endfunction
@@ -39,4 +45,5 @@ augroup cdf_autoload
   autocmd!
   autocmd DirChanged * silent python3 plugin.command_rebuild_define_data()
   autocmd BufReadPost * silent python3 plugin.command_mark_inactive_code()
+  autocmd BufWritePost * silent python3 plugin.command_mark_inactive_code()
 augroup END
