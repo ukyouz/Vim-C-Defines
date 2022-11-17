@@ -1,5 +1,14 @@
 # Vim-C-Defines
-A simple python plugin to calculate all define values in a C source project.
+
+**Vim-C-Defines** is vim plugin that grays out inactive C/C++/Obj-C preprocessor regions with *pure* python code parsing, NO language server required.
+It calculates all define values in a C source project based on my previous work [ukyouz/C-define-Parser][C-define-Parser].
+It is intended to be used with C/C++/Obj-C.
+
+It was only tested on Windows but should theoretically work on other platforms, too.
+
+### Requisite
+
+- vim or neovim with python3 support
 
 
 ## Related Work
@@ -28,6 +37,7 @@ However, it only works with YCM's libclang completer, not the newer and more adv
 
 
 
+[C-define-Parser]: https://github.com/ukyouz/C-define-Parser
 [ifdefhighlighting]: http://www.vim.org/scripts/script.php?script_id=7
 [DyeVim]: https://github.com/davits/DyeVim
 [ycm]: https://github.com/ycm-core/YouCompleteMe
