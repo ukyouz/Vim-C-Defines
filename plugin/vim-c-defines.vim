@@ -22,7 +22,7 @@ EOF
 "  let g:sample_python_plugin_loaded = 1
 
 function! CdfRebuild()
-  python3 plugin.command_rebuild_define_data(0)
+  python3 plugin.command_rebuild_define_data(v:true)
 endfunction
 
 command! -bang -nargs=0 CdfRebuild call CdfRebuild()
@@ -31,7 +31,7 @@ function! CdfRefreshBuffer()
   python3 plugin.command_mark_inactive_code()
 endfunction
 
-command! -bang -nargs=0 CdfRebuild call CdfRefreshBuffer()
+command! -bang -nargs=0 CdfRefreshBuffer call CdfRefreshBuffer()
 
 "  function! CdfTest()
 "    python3 plugin.command_mark_inactive_code()
