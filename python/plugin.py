@@ -200,7 +200,11 @@ def _calc_token(buffer, symbol):
         else:
             text = _convertall_dec2fmt(expanded_token, "0x{:02x}")
         vim.command("echon '\r\r'")
-        vim.command("echom '%s = %s'" % (symbol, text))
+        for line in symbol.split('\n'):
+            vim.command("echom '%s'" % line.lstrip())
+        vim.command("echom ' = '")
+        for line in text.split('\n'):
+            vim.command("echom '%s'" % line.lstrip())
 
 
 """
