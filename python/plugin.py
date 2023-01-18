@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 import os
 import pickle
 
@@ -40,6 +41,11 @@ class Setting:
 def _escape_filepath(folder):
     trans = str.maketrans("/\\:", "---")
     return folder.translate(trans)
+
+
+def _convertall_dec2fmt(text, fmt="0x{:X}"):
+    re_sub_dec2hex = lambda m: "{}".format(fmt).format(int(m.group(1)))
+    return re.sub(r"\b([0-9]+)\b", re_sub_dec2hex, text)
 
 
 def _get_cache_file_for_folder(folder):
@@ -167,6 +173,36 @@ def _unmark_inactive_code(buffer):
     buffer.clear_highlight(_get_hl_srcid(buffer.number))
 
 
+def _calc_token(buffer, symbol):
+    if _get_folder() in PARSER_IS_BUILDING:
+        return
+    parser = _get_parser()
+    if parser is None or not buffer.valid:
+        return
+
+    define = parser.get_expand_define(symbol)
+    if define is not None:
+        # logger.debug("%r", define)
+        value = parser.try_eval_num(define.token)
+        if value is not None:
+            text = "{} ({})".format(value, hex(value))
+        else:
+            text = _convertall_dec2fmt(define.token)
+
+        vim.command("echon '\r\r'")
+        vim.command("echom '%s = %s'" % (define.name, text))
+    else:
+        expanded_token = parser.expand_token(symbol)
+        # logger.debug("%r", expanded_token)
+        value = parser.try_eval_num(expanded_token)
+        if value is not None:
+            text = "{} ({})".format(value, hex(value))
+        else:
+            text = _convertall_dec2fmt(expanded_token, "0x{:02x}")
+        vim.command("echon '\r\r'")
+        vim.command("echom '%s = %s'" % (symbol, text))
+
+
 """
 Public Functions
 """
@@ -186,3 +222,7 @@ def command_mark_inactive_code():
 
 def command_unmark_inactive_code():
     _unmark_inactive_code(vim.current.buffer)
+
+
+def command_calculate_token(token):
+    _calc_token(vim.current.buffer, token)

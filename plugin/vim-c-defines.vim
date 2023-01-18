@@ -33,13 +33,11 @@ endfunction
 
 command! -bang -nargs=0 CdfRefreshBuffer call CdfRefreshBuffer()
 
-"  function! CdfTest()
-"    python3 plugin.command_mark_inactive_code()
-"  endfunction
+function! CdfCalculateToken(txt)
+  python3 plugin.command_calculate_token(vim.eval("a:txt"))
+endfunction
 
-"  function! CdfTest2()
-"    python3 plugin.command_unmark_inactive_code()
-"  endfunction
+command! -bang -nargs=1 CdfCalculateToken call CdfCalculateToken(<q-args>)
 
 augroup cdf_autoload
   autocmd!
@@ -47,3 +45,17 @@ augroup cdf_autoload
   autocmd BufReadPost * silent python3 plugin.command_mark_inactive_code()
   autocmd BufWritePost * silent python3 plugin.command_mark_inactive_code()
 augroup END
+
+function! CdfGetVisualSelection()
+  try
+      let x_save = getreg("x", 1)
+      let type = getregtype("x")
+      noautocmd normal! gv"xy
+      return escape(@x, '"')
+  finally
+      call setreg("x", x_save, type)
+  endtry
+endfunction
+
+"  nnoremap <Leader>d :<C-R>=printf("CdfCalculateToken %s", expand("<cword>"))<CR><CR>
+"  xnoremap <Leader>d :<C-U><C-R>=printf("CdfCalculateToken %s", CdfGetVisualSelection())<CR><CR>
