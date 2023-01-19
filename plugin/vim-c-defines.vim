@@ -22,7 +22,7 @@ EOF
 "  let g:sample_python_plugin_loaded = 1
 
 function! CdfRebuild()
-  python3 plugin.command_rebuild_define_data(v:true)
+  python3 plugin.command_rebuild_define_data(1)
 endfunction
 
 command! -bang -nargs=0 CdfRebuild call CdfRebuild()
