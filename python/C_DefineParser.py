@@ -67,10 +67,10 @@ def git_lsfiles(directory, ext=".h"):
 
 
 REG_LITERALS = [
-    re.compile(r"\b(?P<NUM>[0-9]+)([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
-    re.compile(r"\b(?P<NUM>0b[01]+)([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
-    re.compile(r"\b(?P<NUM>0[0-7]+)([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
-    re.compile(r"\b(?P<NUM>0x[0-9a-f]+)([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
+    re.compile(r"\b(?P<NUM>[0-9]+)(?:##)?([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
+    re.compile(r"\b(?P<NUM>0b[01]+)(?:##)?([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
+    re.compile(r"\b(?P<NUM>0[0-7]+)(?:##)?([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
+    re.compile(r"\b(?P<NUM>0x[0-9a-f]+)(?:##)?([ul]|ull?|ll?u|ll)\b", re.IGNORECASE),
 ]
 
 REG_SPECIAL_SIZEOFTYPES = [
@@ -198,6 +198,7 @@ class Parser:
         if_depth = 0
         if_true_bmp = 1  # bitmap for every #if statement
         if_done_bmp = 1  # bitmap for every #if statement
+        first_guard_token = True
         is_block_comment = False
         # with open(filepath, "r", errors="replace") as fs:
         multi_lines = ""
@@ -239,18 +240,25 @@ class Parser:
                         if_token = (
                             if_tokens[0].name if len(if_tokens) == 1 else "<unknown>"
                         )
-                        if if_token in self.defs:
-                            if not ignore_header_guard:
-                                if_token_val = 1
-                            else:
-                                defined_file = self.defs[if_token].file
-                                defined_line = self.defs[if_token].lineno
-                                if os.path.samefile(defined_file, fileio.name) and line_no < defined_line:
-                                    if_token_val = 0
-                                else:
-                                    if_token_val = 1
+                        if (
+                            ignore_header_guard
+                            and first_guard_token
+                            and (match_if.group("NOT") == "n")
+                        ):
+                            if_token_val = 0  # header guard always uses #ifndef *
                         else:
-                            if_token_val = 0
+                            if if_token in self.defs:
+                                if not ignore_header_guard:
+                                    if_token_val = 1
+                                else:
+                                    defined_file = self.defs[if_token].file
+                                    defined_line = self.defs[if_token].lineno
+                                    if os.path.samefile(defined_file, fileio.name) and line_no < defined_line:
+                                        if_token_val = 0
+                                    else:
+                                        if_token_val = 1
+                            else:
+                                if_token_val = 0
                     else:
                         if_token = self.expand_token(
                             token,
@@ -261,6 +269,9 @@ class Parser:
                         if_token_val = bool(self.try_eval_num(if_token))
                     if_true_bmp |= BIT(if_depth) * (
                         if_token_val ^ (match_if.group("NOT") == "n")
+                    )
+                    first_guard_token = (
+                        False if match_if.group("NOT") == "n" else first_guard_token
                     )
                 elif match_elif:
                     if_token = self.expand_token(
@@ -278,7 +289,7 @@ class Parser:
                 elif match_endif:
                     if_true_bmp &= ~BIT(if_depth)
                     if_done_bmp &= ~BIT(if_depth)
-                    assert if_depth > 0, "%s:%s %s" % (fileio.name, line_no, line)
+                    assert if_depth > 0
                     if_depth -= 1
 
             multi_lines += REGEX_SYNTAX_LINE_BREAK.sub("", line)
