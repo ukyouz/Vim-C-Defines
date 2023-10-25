@@ -210,6 +210,8 @@ class Parser:
         is_block_comment = False
         # with open(filepath, "r", errors="replace") as fs:
         multi_lines = ""
+
+        captured_ifs = []
         for line_no, line in enumerate(fileio.readlines(), 1):
 
             line = REGEX_SYNTAX_LINE_COMMENT.sub(
@@ -236,12 +238,21 @@ class Parser:
                         yield (line, line_no)
                     continue
 
+            multi_lines += REGEX_SYNTAX_LINE_BREAK.sub("", line)
+            if REGEX_SYNTAX_LINE_BREAK.search(line):
+                if reserve_whitespace:
+                    if if_true_bmp == BIT(if_depth + 1) - 1:
+                        yield (line, line_no)
+                continue
+            single_line = REGEX_SYNTAX_LINE_BREAK.sub("", multi_lines)
+
             if try_if_else:
-                match_if = REG_STATEMENT_IF.match(line)
-                match_elif = REG_STATEMENT_ELIF.match(line)
-                match_else = REG_STATEMENT_ELSE.match(line)
-                match_endif = REG_STATEMENT_ENDIF.match(line)
+                match_if = REG_STATEMENT_IF.match(single_line)
+                match_elif = REG_STATEMENT_ELIF.match(single_line)
+                match_else = REG_STATEMENT_ELSE.match(single_line)
+                match_endif = REG_STATEMENT_ENDIF.match(single_line)
                 if match_if:
+                    captured_ifs.append((line_no, single_line))
                     if_depth += 1
                     token = match_if.group("TOKEN")
                     if match_if.group("DEF") is not None:
@@ -281,6 +292,7 @@ class Parser:
                         False if match_if.group("NOT") == "n" else first_guard_token
                     )
                 elif match_elif:
+                    captured_ifs.append((line_no, single_line))
                     if_token = self.expand_token(
                         match_elif.group("TOKEN"),
                         zero_undefined=True,
@@ -289,21 +301,22 @@ class Parser:
                     if_true_bmp |= BIT(if_depth) * if_token_val
                     if_true_bmp &= ~(BIT(if_depth) & if_done_bmp)
                 elif match_else:
+                    captured_ifs.append((line_no, single_line))
                     if_true_bmp ^= BIT(if_depth)  # toggle state
                     if_true_bmp &= ~(BIT(if_depth) & if_done_bmp)
                 elif match_endif:
+                    captured_ifs.append((line_no, single_line))
                     if_true_bmp &= ~BIT(if_depth)
                     if_done_bmp &= ~BIT(if_depth)
-                    assert if_depth > 0
+                    if len(captured_ifs) > 1:
+                        assert if_depth > 0, "{}#{}".format(fileio.name, line_no)
+                    else:
+                        # some source files may tend to leave an extra #endif at the end
+                        # I think it is for unintentionally include, so just warn and let it go.
+                        print("Extra #endif found in {}#{}".format(fileio.name, line_no))
+                        break
                     if_depth -= 1
 
-            multi_lines += REGEX_SYNTAX_LINE_BREAK.sub("", line)
-            if REGEX_SYNTAX_LINE_BREAK.search(line):
-                if reserve_whitespace:
-                    if if_true_bmp == BIT(if_depth + 1) - 1:
-                        yield (line, line_no)
-                continue
-            single_line = REGEX_SYNTAX_LINE_BREAK.sub("", multi_lines)
             if if_true_bmp == BIT(if_depth + 1) - 1:
                 yield (single_line, line_no)
                 if_done_bmp |= BIT(if_depth)
