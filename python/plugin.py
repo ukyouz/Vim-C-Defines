@@ -78,6 +78,31 @@ def _get_hl_srcid(bufid):
     return HL_SRCID[bufid]
 
 
+def _get_configs_from_compile_flags(folder: str):
+    compile_flag_txt = os.path.join(folder, "compile_flags.txt")
+    if not os.path.exists(compile_flag_txt):
+        return []
+
+    with open(compile_flag_txt) as fs:
+        arg_txt = fs.read().replace("\n", " ")
+    arguments = [x.strip() for x in arg_txt.split(" ") if x]
+
+    predefines = []
+    for arg in arguments:
+        if not arg.startswith("-D"):
+            continue
+
+        pair = tuple(arg[2:].split("="))
+        if len(pair) == 1:
+            # ie: -DDEBUG
+            predefines.append((pair[0], 0))
+        elif len(pair) == 2:
+            # ie: -DDEBUG=0
+            predefines.append(pair)
+
+    return predefines
+
+
 def _init_parser():
     active_folder = _get_folder()
     if not _is_root(active_folder):
@@ -106,13 +131,12 @@ def _init_parser():
     p = C_DefineParser.Parser()
     PARSERS[active_folder] = p
 
-    # TODO
-    # predefines = _get_configs_from_file(
-    #     window, _get_setting(window, DP_SETTING_COMPILE_FILE)
-    # )
-    # for d in predefines:
-    #     logger.debug("  predefine: %s", d)
-    #     p.insert_define(d[0], token=d[1])
+    # TODO: available to switch configuration
+    predefines = _get_configs_from_compile_flags(active_folder)
+    for d in predefines:
+        # logger.debug("  predefine: %s", d)
+        print("  predefine: %r" % d)
+        p.insert_define(d[0], token=d[1])
 
     def async_proc():
         p.read_folder_h(active_folder)

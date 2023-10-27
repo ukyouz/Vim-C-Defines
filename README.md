@@ -6,6 +6,15 @@ It is intended to be used with C/C++/Obj-C.
 
 It was only tested on Windows but should theoretically work on other platforms, too.
 
+# Pre-Define
+
+If you want to add pre-define specified in runtime build commands, you can add `compile_flags.txt` in your project root. Add `-D` flags for you definitions, like this:
+
+```
+-DWIN32
+-DENV=1
+```
+
 ### Requisite
 
 - vim or neovim with python3 support
