@@ -30,12 +30,21 @@ HL_SRCID = {}
 
 
 class Setting:
-    Cdf_CacheDirectory = "~/.vim/.Cdf_Cache"
-    Cdf_EnableGrayout = True
-    Cdf_SupportExtensions = [".h", ".c", ".cpp"]
-    Cdf_RootMarkers = [".root", ".git", ".gitlab"]
+    Cdf_CacheDirectory: str = "~/.vim/.Cdf_Cache"
+    Cdf_EnableGrayout: bool = True
+    Cdf_SupportExtensions: list = [".h", ".c", ".cpp"]
+    Cdf_RootMarkers: list = [".root", ".git", ".gitlab"]
 
-    Cdf_InactiveRegionHighlightGroup = "comment"
+    Cdf_InactiveRegionHighlightGroup: str = "comment"
+
+    @classmethod
+    def update(cls):
+        for k in cls.__annotations__.keys():
+            try:
+                val = vim.eval("g:%s" % k)
+                setattr(cls, k, val)
+            except:
+                pass
 
 
 def _escape_filepath(folder):
@@ -104,6 +113,8 @@ def _get_configs_from_compile_flags(folder: str):
 
 
 def _init_parser():
+    Setting.update()
+
     active_folder = _get_folder()
     if not _is_root(active_folder):
         print("root markers not found in %r, skip!" % active_folder)
@@ -134,8 +145,7 @@ def _init_parser():
     # TODO: available to switch configuration
     predefines = _get_configs_from_compile_flags(active_folder)
     for d in predefines:
-        # logger.debug("  predefine: %s", d)
-        print("  predefine: %r" % d)
+        print("  predefine: {!r}".format(d))
         p.insert_define(d[0], token=d[1])
 
     def async_proc():

@@ -1,0 +1,25 @@
+*vim-c-defines.txt*
+
+==============================================================================
+
+CONTENTS                                        *vim-c-defines-contents*
+Options                                         |vim-c-defines-options|
+
+==============================================================================
+
+OPTIONS                                         *vim-c-defines-options*
+
+g:Cdf_CacheDirectory                            *g:Cdf_CacheDirectory*
+    Default value is "~/.vim/.Cdf_Cache"
+
+g:Cdf_EnableGrayout                             *g:Cdf_EnableGrayout*
+    Default value is v:true
+
+g:Cdf_SupportExtensions                         *g:Cdf_SupportExtensions*
+    Default value is [".h", ".c", ".cpp"]
+
+g:Cdf_RootMarkers                               *g:Cdf_RootMarkers*
+    Default value is [".root", ".git", ".gitlab"]
+
+g:Cdf_InactiveRegionHighlightGroup              *g:Cdf_InactiveRegionHighlightGroup*
+    Default value is "comment"
