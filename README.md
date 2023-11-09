@@ -15,6 +15,12 @@ If you want to add pre-define specified in runtime build commands, you can add `
 -DENV=1
 ```
 
+
+# Configurations
+
+Please see document by command `:help vim-c-defines`
+
+
 ### Requisite
 
 - vim or neovim with python3 support
