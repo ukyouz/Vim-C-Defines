@@ -42,6 +42,7 @@ command! -bang -nargs=1 CdfCalculateToken call CdfCalculateToken(<q-args>)
 augroup cdf_autoload
   autocmd!
   autocmd DirChanged * silent python3 plugin.command_rebuild_define_data()
+  autocmd SessionLoadPost * silent python3 plugin.command_rebuild_define_data()
   autocmd BufReadPost * silent python3 plugin.command_mark_inactive_code()
   autocmd BufWritePost * silent python3 plugin.command_mark_inactive_code()
 augroup END

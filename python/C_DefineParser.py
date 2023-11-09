@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 
 # import functools
 from collections import Counter, defaultdict, namedtuple
@@ -114,6 +115,21 @@ class IncludeHeader(NamedTuple):
     src_file: Path
 
 
+class SysLogger:
+    def write(self, data):
+        ...
+
+
+@contextmanager
+def hide_stderr():
+    bak = sys.stderr
+    try:
+        sys.stderr = SysLogger()
+        yield
+    finally:
+        sys.stderr = bak
+
+
 class Parser:
     def __init__(self):
         self.reset()
@@ -191,7 +207,8 @@ class Parser:
         token = token.replace("||", " or ")
         token = REGEX_OPERATOR_NOT.sub(" not ", token)
         try:
-            return int(eval(token))
+            with hide_stderr():
+                return int(eval(token))
         except:
             return None
 
