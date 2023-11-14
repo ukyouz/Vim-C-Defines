@@ -99,7 +99,7 @@ REG_STATEMENT_ELSE = re.compile(r"#\s*else.*")
 REG_STATEMENT_ENDIF = re.compile(r"#\s*endif.*")
 
 REGEX_SYNTAX_LINE_COMMENT = re.compile(r"\s*\/\/.*$")
-REGEX_SYNTAX_INLINE_COMMENT = re.compile(r"\/\*[^\/]+\*\/")
+REGEX_SYNTAX_INLINE_COMMENT = re.compile(r"\/\*.*\*\/")
 REGEX_SYNTAX_LINE_BREAK = re.compile(r"\\\s*$")
 
 REGEX_MACRO_HASH_OP = re.compile(r"\s*#\s*(?P<ARG>[^\s]+)")
