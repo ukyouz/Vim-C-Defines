@@ -29,7 +29,7 @@ Please see document by command `:help vim-c-defines`
 ## Related Work
 There are some other plugins providing similar functionality, but in different ways.
 
-* [ifdef highlighting][ifdefhighlighting] adds static vim syntax rules for each *manually* defined macro. It does not make use of a compiler and requires the user to manually specify which macros are defined, thus being rather unflexible and often fails to properly detect skipped regions.
+* [ifdef highlighting][ifdefhighlighting] adds static vim syntax rules for each *manually* defined directive. It does not make use of a compiler and requires the user to manually specify which macros are defined, thus being rather unflexible and often fails to properly detect skipped regions.
 
 * [DyeVim][DyeVim] integrates with (a custom fork of) [YouCompleteMe][ycm] to retrieve extended syntax information for semantic highlighting, including skipped preprocessor regions.
 However, it only works with YCM's libclang completer, not the newer and more advanced clangd completer.
