@@ -17,9 +17,14 @@ g:Cdf_EnableGrayout                             *g:Cdf_EnableGrayout*
     Control whether to gray out those inactive regions.
     Default value is v:true
 
-g:Cdf_SupportExtensions                         *g:Cdf_SupportExtensions*
-    Config the file extensions that enable the parser.
-    Default value is [".h", ".c", ".cpp"]
+g:Cdf_SupportHeaderExtensions                   *g:Cdf_SupportHeaderExtensions*
+    Config the header file extensions that enable the parser.
+    Default value is [".h"]
+
+g:Cdf_SupportSourceExtensions                   *g:Cdf_SupportSourceExtensions*
+    Config the source file extensions that enable the parser.
+    Files with these extensions also well consider the inline #define directives.
+    Default value is [".c", ".cpp"]
 
 g:Cdf_RootMarkers                               *g:Cdf_RootMarkers*
     Config the root markers for your source code.

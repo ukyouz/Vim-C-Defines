@@ -32,7 +32,8 @@ HL_SRCID = {}
 class Setting:
     Cdf_CacheDirectory: str = "~/.vim/.Cdf_Cache"
     Cdf_EnableGrayout: bool = True
-    Cdf_SupportExtensions: list = [".h", ".c", ".cpp"]
+    Cdf_SupportHeaderExtensions: list = [".h"]
+    Cdf_SupportSourceExtensions: list = [".c", ".cpp"]
     Cdf_RootMarkers: list = [".root", ".git", ".gitlab"]
 
     Cdf_InactiveRegionHighlightGroup: str = "comment"
@@ -179,21 +180,28 @@ def _mark_inactive_code(buffer):
 
     filename = buffer.name
     _, ext = os.path.splitext(filename)
-    if ext not in Setting.Cdf_SupportExtensions:
+    if (
+        ext not in Setting.Cdf_SupportHeaderExtensions
+        and ext not in Setting.Cdf_SupportSourceExtensions
+    ):
         return
 
     inactive_lines = set(range(1, 1 + len(buffer)))
 
     fileio = io.StringIO("\n".join(buffer))
     fileio.name = filename
-    for _, lineno in p.read_file_lines(
-        fileio,
-        reserve_whitespace=True,
-        ignore_header_guard=True,
-        include_block_comment=True,
-    ):
-        inactive_lines.remove(lineno)
-    inactive_lines -= set(p.filelines.get(filename, []))
+    if ext in Setting.Cdf_SupportSourceExtensions:
+        ctx_man = p.read_c
+    else:
+        ctx_man = p.read_h
+    with ctx_man(filename, try_if_else=True):
+        for _, lineno in p.read_file_lines(
+            fileio,
+            reserve_whitespace=True,
+            ignore_header_guard=True,
+            include_block_comment=True,
+        ):
+            inactive_lines.remove(lineno)
     print("inactive lines count: %d" % len(inactive_lines))
 
     regions = [
