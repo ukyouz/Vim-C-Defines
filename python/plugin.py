@@ -223,30 +223,32 @@ def _calc_token(buffer, symbol):
         return
 
     define = parser.get_expand_define(symbol)
-    if define is not None:
-        # logger.debug("%r", define)
-        value = parser.try_eval_num(define.token)
-        if value is not None:
-            text = "{} ({})".format(value, hex(value))
-        else:
-            text = _convertall_dec2fmt(define.token)
 
-        vim.command("echon '\r\r'")
-        vim.command("echom '%s = %s'" % (define.name, text))
-    else:
-        expanded_token = parser.expand_token(symbol)
-        # logger.debug("%r", expanded_token)
-        value = parser.try_eval_num(expanded_token)
-        if value is not None:
-            text = "{} ({})".format(value, hex(value))
+    with parser.read_c(buffer.name, try_if_else=True):
+        if define is not None:
+            # logger.debug("%r", define)
+            value = parser.try_eval_num(define.token)
+            if value is not None:
+                text = "{} ({})".format(value, hex(value))
+            else:
+                text = _convertall_dec2fmt(define.token)
+
+            vim.command("echon '\r\r'")
+            vim.command("echom '%s = %s'" % (define.name, text))
         else:
-            text = _convertall_dec2fmt(expanded_token, "0x{:02x}")
-        vim.command("echon '\r\r'")
-        for line in symbol.split('\n'):
-            vim.command("echom '%s'" % line.lstrip())
-        vim.command("echom ' = '")
-        for line in text.split('\n'):
-            vim.command("echom '%s'" % line.lstrip())
+            expanded_token = parser.expand_token(symbol)
+            # logger.debug("%r", expanded_token)
+            value = parser.try_eval_num(expanded_token)
+            if value is not None:
+                text = "{} ({})".format(value, hex(value))
+            else:
+                text = _convertall_dec2fmt(expanded_token, "0x{:02x}")
+            vim.command("echon '\r\r'")
+            for line in symbol.split('\n'):
+                vim.command("echom '%s'" % line.lstrip())
+            vim.command("echom ' = '")
+            for line in text.split('\n'):
+                vim.command("echom '%s'" % line.lstrip())
 
 
 """
