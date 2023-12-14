@@ -150,7 +150,7 @@ def _init_parser():
         p.insert_define(d[0], token=d[1])
 
     def async_proc():
-        p.read_folder_h(active_folder)
+        p.read_folder_h(active_folder, Setting.Cdf_SupportHeaderExtensions)
         PARSER_IS_BUILDING.remove(active_folder)
 
         if Setting.Cdf_EnableGrayout:
