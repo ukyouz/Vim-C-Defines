@@ -239,10 +239,6 @@ class Parser:
         captured_ifs = []
         for line_no, line in enumerate(fileio.readlines(), 1):
 
-            line = REGEX_SYNTAX_LINE_COMMENT.sub(
-                "", self.strip_token(line, reserve_whitespace)
-            )
-
             if not is_block_comment:
                 if "/*" in line:  # start of block comment
                     block_comment_start = line.index("/*")
@@ -263,13 +259,17 @@ class Parser:
                         yield (line, line_no)
                     continue
 
-            multi_lines += REGEX_SYNTAX_LINE_BREAK.sub("", line)
+            multi_lines += REGEX_SYNTAX_LINE_BREAK.sub(
+                " ",
+                self.strip_token(line, reserve_whitespace),
+            )
             if REGEX_SYNTAX_LINE_BREAK.search(line):
                 if reserve_whitespace:
                     if if_true_bmp == BIT(if_depth + 1) - 1:
                         yield (line, line_no)
                 continue
-            single_line = REGEX_SYNTAX_LINE_BREAK.sub("", multi_lines)
+            single_line = multi_lines
+            multi_lines = ""
 
             if try_if_else:
                 match_if = REG_STATEMENT_IF.match(single_line)
@@ -347,7 +347,6 @@ class Parser:
                 if_done_bmp |= BIT(if_depth)
             elif try_if_else and (match_if or match_elif or match_else or match_endif):
                 yield (single_line, line_no)
-            multi_lines = ""
 
     def _get_define(self, line, filepath="", lineno=0):
         match = REGEX_UNDEF.match(line)
