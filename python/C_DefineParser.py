@@ -268,7 +268,7 @@ class Parser:
                     if if_true_bmp == BIT(if_depth + 1) - 1:
                         yield (line, line_no)
                 continue
-            single_line = multi_lines
+            single_line = REGEX_SYNTAX_LINE_COMMENT.sub("", multi_lines)
             multi_lines = ""
 
             if try_if_else:
@@ -774,3 +774,17 @@ class Parser:
             ):
                 lines.append(line)
         return lines
+
+
+if __name__ == "__main__":
+    p = Parser()
+    folder = r"C:\Users\231814\Desktop\LithiusProZ\CtEmu500.1.22.6"
+    x = p.get_expand_defines(folder + "/Platform/Z_500.001.022.006/ecc2/include/prm1.h")
+    with p.read_c(folder + "/Platform/Z_500.001.022.006/ct/mc/src/module/astr/astrcalibration.c"):
+        print(1)
+    # p.insert_define("LITHIUS_EP", token="1")
+    # p.read_folder_h(folder)
+
+    # file = r"C:\Users\231814\Desktop\LithiusProZ\CtEmu500.1.22.6\Platform\Z_500.001.022.006\ct\mc\src\unit\css\tfmntprc.c"
+    # x = p.get_preprocess_source(file)
+    print(1)
