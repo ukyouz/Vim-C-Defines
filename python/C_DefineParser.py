@@ -465,6 +465,7 @@ class Parser:
     def read_c(self, filepath, try_if_else=False):
         """use `with` context manager for having temporary tokens defined in .c source file"""
         temp_defs = {}  # use dict to uniqify define name
+        temp_overwrite = {}
         try:
             add_includes = Path(filepath).resolve() not in self.include_trees
             with open(filepath, "r", errors="replace") as fs:
@@ -483,10 +484,10 @@ class Parser:
                     define = self._get_define(line)
                     if define == None:
                         continue
-                    if define.name in self.defs:
-                        continue
                     # if len(define.params):
                     #     return
+                    if define.name in self.defs:
+                        temp_overwrite[define.name] = self.defs[define.name]
                     temp_defs[define.name] = define
 
             for define in temp_defs.values():
@@ -505,6 +506,9 @@ class Parser:
         finally:
             for define in temp_defs.values():
                 del self.defs[define.name]
+            # restore temp overwrite
+            for name, define in temp_overwrite.items():
+                self.defs[name] = define
 
     def _find_token_params(self, params) -> str:
         if len(params) and params[0] != "(":
