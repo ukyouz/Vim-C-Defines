@@ -25,8 +25,7 @@ logger.setLevel(logging.INFO)
 
 PARSERS = {}
 PARSER_IS_BUILDING = set()
-
-HL_SRCID = {}
+HIGHLIGHT_NS = vim.api.create_namespace("Vim-C-Defines")
 
 
 class Setting:
@@ -78,14 +77,6 @@ def _is_root(folder):
 
 def _get_folder():
     return vim.command_output("pwd")
-
-
-def _get_hl_srcid(bufid):
-    if bufid not in HL_SRCID:
-        src_id = vim.new_highlight_source()
-        HL_SRCID[bufid] = src_id
-
-    return HL_SRCID[bufid]
 
 
 def _get_configs_from_compile_flags(folder: str):
@@ -204,15 +195,14 @@ def _mark_inactive_code(buffer):
             inactive_lines.remove(lineno)
     print("inactive lines count: %d" % len(inactive_lines))
 
-    regions = [
-        (Setting.Cdf_InactiveRegionHighlightGroup, line - 1, 0, -1)
-        for line in inactive_lines
-    ]
-    buffer.update_highlights(_get_hl_srcid(buffer.number), regions)
+    _unmark_inactive_code(buffer)
+    for line in inactive_lines:
+        hl = (Setting.Cdf_InactiveRegionHighlightGroup, line - 1, 0, -1)
+        vim.api.buf_add_highlight(buffer.number, HIGHLIGHT_NS, *hl)
 
 
 def _unmark_inactive_code(buffer):
-    buffer.clear_highlight(_get_hl_srcid(buffer.number))
+    vim.api.buf_clear_namespace(buffer.number, HIGHLIGHT_NS, 0, -1)
 
 
 def _calc_token(buffer, symbol):
