@@ -115,24 +115,28 @@ def _init_parser():
     print("init_parser %r" % active_folder)
 
     cache_file = _get_cache_file_for_folder(active_folder)
-    if os.path.exists(cache_file):
+    
+    def async_proc():
         try:
             with open(cache_file, "rb") as fs:
                 PARSERS[active_folder] = pickle.load(fs)
+        except:
+            _make_new_parser(active_folder)
+        else:
             print("dtag cached found: %r" % cache_file)
             if Setting.Cdf_EnableGrayout:
                 _mark_inactive_code(vim.current.buffer)
-            return
-        except:
-            pass
 
+    vim.async_call(async_proc)
+
+
+def _make_new_parser(active_folder: str):
     if active_folder in PARSER_IS_BUILDING:
         return
 
     PARSER_IS_BUILDING.add(active_folder)
 
     p = C_DefineParser.Parser()
-    PARSERS[active_folder] = p
 
     # TODO: available to switch configuration
     predefines = _get_configs_from_compile_flags(active_folder)
@@ -140,16 +144,20 @@ def _init_parser():
         print("  predefine: {!r}".format(d))
         p.insert_define(d[0], token=d[1])
 
+    def dump_cache_file():
+        with open(_get_cache_file_for_folder(active_folder), "wb") as fs:
+            pickle.dump(p, fs)
+
     def async_proc():
         p.read_folder_h(active_folder, Setting.Cdf_SupportHeaderExtensions)
+        PARSERS[active_folder] = p
         PARSER_IS_BUILDING.remove(active_folder)
 
         if Setting.Cdf_EnableGrayout:
             _mark_inactive_code(vim.current.buffer)
 
         print("done_parser: %r" % active_folder)
-        with open(_get_cache_file_for_folder(active_folder), "wb") as fs:
-            pickle.dump(p, fs)
+        vim.async_call(dump_cache_file)
 
     print("building define database, please wait...")
     vim.async_call(async_proc)
@@ -163,8 +171,6 @@ def _get_parser():
 
 
 def _mark_inactive_code(buffer):
-    if _get_folder() in PARSER_IS_BUILDING:
-        return
     p = _get_parser()
     if p is None or not buffer.valid:
         return
@@ -206,8 +212,6 @@ def _unmark_inactive_code(buffer):
 
 
 def _calc_token(buffer, symbol):
-    if _get_folder() in PARSER_IS_BUILDING:
-        return
     parser = _get_parser()
     if parser is None or not buffer.valid:
         return
