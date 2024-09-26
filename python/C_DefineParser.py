@@ -526,12 +526,15 @@ class Parser:
     def find_tokens(self, token) -> list[Token]:
 
         # remove string value in token
-        token = REGEX_STRING.sub("", token)
+        string_spans = [m.span() for m in REGEX_STRING.finditer(token)]
 
         tokens = list(REGEX_TOKEN.finditer(token))
         if len(tokens):
             ret_tokens = []
             for match in tokens:
+                if any(s[0] < match.start() and match.end() < s[1] for s in string_spans):
+                    # skip tokens in string
+                    continue
                 _token = match.group("NAME")
                 params = None
                 if _token in self.defs and self.defs[_token].params is not None:
@@ -598,7 +601,7 @@ class Parser:
         new_token = define.token
         old_param_regs = (re.compile(WORD_BOUNDARY(x)) for x in old_params)
         for old_p_reg, new_p in zip(old_param_regs, new_params):
-            new_token = old_p_reg.sub(new_p, new_token)
+            new_token = old_p_reg.sub(new_p.replace("\\", r"\\"), new_token)
 
         if variadic_pos >= 0 and len(new_params) >= variadic_pos:
             if REGEX_MACRO_VA_ARGS.search(new_token):
