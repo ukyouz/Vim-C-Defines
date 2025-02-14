@@ -63,7 +63,7 @@ def _get_cache_file_for_folder(folder):
     if not os.path.exists(cache_folder):
         os.makedirs(cache_folder)
     cache_file = os.path.join(cache_folder, tag_file)
-    print("dtag file: %r" % cache_file)
+    # print("dtag file: %r" % cache_file)
     return cache_file
 
 
@@ -132,6 +132,7 @@ def _init_parser():
 
 def _make_new_parser(active_folder: str):
     if active_folder in PARSER_IS_BUILDING:
+        print("parser is building, skip!")
         return
 
     PARSER_IS_BUILDING.add(active_folder)
@@ -196,7 +197,6 @@ def _mark_inactive_code(buffer):
             fileio,
             reserve_whitespace=True,
             ignore_header_guard=True,
-            include_block_comment=True,
         ):
             inactive_lines.remove(lineno)
     print("inactive lines count: %d" % len(inactive_lines))
@@ -221,7 +221,8 @@ def _calc_token(buffer, symbol):
     with parser.read_c(buffer.name, try_if_else=True):
         if define is not None:
             # logger.debug("%r", define)
-            value = parser.try_eval_num(define.token)
+            expanded_token = parser.expand_token(define.token)
+            value = parser.cdef.try_eval_num(expanded_token)
             if value is not None:
                 text = "{} ({})".format(value, hex(value))
             else:
@@ -232,7 +233,7 @@ def _calc_token(buffer, symbol):
         else:
             expanded_token = parser.expand_token(symbol)
             # logger.debug("%r", expanded_token)
-            value = parser.try_eval_num(expanded_token)
+            value = parser.cdef.try_eval_num(expanded_token)
             if value is not None:
                 text = "{} ({})".format(value, hex(value))
             else:
