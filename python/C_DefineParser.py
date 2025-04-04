@@ -391,7 +391,7 @@ class Parser:
         params = match.group("PARAMS")
         param_list = [p.strip() for p in params.split(",")] if params else []
         match_token = match.group("TOKEN") or ""
-        token = match_token.strip() or "(1)"
+        token = match_token.strip()
 
         """
         #define AAA     // params = None
