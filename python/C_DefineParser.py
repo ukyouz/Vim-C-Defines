@@ -146,7 +146,7 @@ class CDefineEnv:
             return int(eval(token, self._globals))
         except:
             return None
-    
+
     def stringify_token(self, line: str, old_params: list = None) -> str:
         expanded_token = line
         for mark_match in REGEX_MACRO_HASH_OP.finditer(line):
@@ -262,9 +262,11 @@ def _search_included_file(header_files: list, inc_path, src_file):
 
 
 class Parser:
-    def __init__(self):
-        self.reset()
-        self.filelines = defaultdict(list)
+    def __new__(cls):
+        ins = super().__new__(cls)
+        ins.reset()
+        ins.filelines = defaultdict(list)
+        return ins
 
     def reset(self):
         self.cdef = CDefineEnv()
@@ -368,7 +370,7 @@ class Parser:
 
             if not try_if_else or is_active(merged_line):
                 yield (merged_line, line_no)
-    
+
             merged_line = ""
 
     def _do_define_directive(self, line, filepath="", lineno=0) -> Define | None:
