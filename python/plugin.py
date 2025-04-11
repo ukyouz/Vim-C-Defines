@@ -269,3 +269,10 @@ def command_unmark_inactive_code():
 
 def command_calculate_token(token):
     _calc_token(vim.current.buffer, token)
+
+def command_toggle_grayout():
+    Setting.Cdf_EnableGrayout = not Setting.Cdf_EnableGrayout
+    if Setting.Cdf_EnableGrayout:
+        command_mark_inactive_code()
+    else:
+        command_unmark_inactive_code()

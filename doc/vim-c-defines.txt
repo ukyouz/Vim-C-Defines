@@ -4,6 +4,7 @@
 
 CONTENTS                                        *vim-c-defines-contents*
 Options                                         |vim-c-defines-options|
+Commands                                        |vim-c-defines-commands|
 
 ==============================================================================
 
@@ -33,3 +34,15 @@ g:Cdf_RootMarkers                               *g:Cdf_RootMarkers*
 g:Cdf_InactiveRegionHighlightGroup              *g:Cdf_InactiveRegionHighlightGroup*
     Config the highlight group you want for those inactive regions.
     Default value is "comment"
+
+
+COMMANDS                                        *vim-c-defines-commands
+
+CdfRebuild
+    Rebuild C definitions database for the current open root directory.
+
+CdfCalculateToken(<token>)
+    Try preprocess the <token> and display the expansion result.
+
+CdfToggleGrayout
+    Toggle whether to gray out the inactive regions.

@@ -39,6 +39,12 @@ endfunction
 
 command! -bang -nargs=1 CdfCalculateToken call CdfCalculateToken(<q-args>)
 
+function! CdfToggleGrayout()
+  python3 plugin.command_toggle_grayout()
+endfunction
+
+command! -bang -nargs=0 CdfToggleGrayout call CdfToggleGrayout()
+
 augroup cdf_autoload
   autocmd!
   autocmd DirChanged * silent python3 plugin.command_rebuild_define_data()
