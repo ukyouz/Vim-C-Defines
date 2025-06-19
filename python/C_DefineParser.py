@@ -49,9 +49,11 @@ def is_git(folder):
     return len(markers & files)
 
 
-def git_lsfiles(directory, exts=None):
+def git_lsfiles(directory, exts=None, recurse_submodule=False):
     exts = exts or [".h"]
     git_cmds = ["git", "--git-dir", os.path.join(directory, ".git"), "ls-files"]
+    if recurse_submodule:
+        git_cmds.append("--recurse-submodules")
     logger.debug(" ".join(git_cmds))
     try:
         filelist_output = subprocess.check_output(
@@ -275,6 +277,7 @@ class Parser:
         self.folder = ""
         self.include_trees = defaultdict(list)  # dict[filename: str, include_files: list[str]]
         self.header_files = []
+        self.recurse_submodule = False
 
     def insert_define(self, name, *, params=None, token=None, filename="", lineno=0):
         """params: list of parameters required, token: define body"""
@@ -413,7 +416,7 @@ class Parser:
         self.folder = directory
 
         if is_git(directory):
-            header_files = git_lsfiles(directory, exts)
+            header_files = git_lsfiles(directory, exts, self.recurse_submodule)
         else:
             header_files = glob_recursive(directory, exts)
         self.header_files = [os.path.normpath(f) for f in header_files]

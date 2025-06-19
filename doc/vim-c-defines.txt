@@ -31,6 +31,10 @@ g:Cdf_RootMarkers                               *g:Cdf_RootMarkers*
     Config the root markers for your source code.
     Default value is [".root", ".git", ".gitlab"]
 
+Cdf_RecurseSubmodules                           *Cdf_RecurseSubmodules*
+    Config whether to read symbols that come from git submodules.
+    Default value is v:false
+
 g:Cdf_InactiveRegionHighlightGroup              *g:Cdf_InactiveRegionHighlightGroup*
     Config the highlight group you want for those inactive regions.
     Default value is "comment"

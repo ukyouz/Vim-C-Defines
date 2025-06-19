@@ -34,6 +34,7 @@ class Setting:
     Cdf_SupportHeaderExtensions: list = [".h"]
     Cdf_SupportSourceExtensions: list = [".c", ".cpp"]
     Cdf_RootMarkers: list = [".root", ".git", ".gitlab"]
+    Cdf_RecurseSubmodules: bool = False
 
     Cdf_InactiveRegionHighlightGroup: str = "comment"
 
@@ -138,6 +139,7 @@ def _make_new_parser(active_folder: str):
     PARSER_IS_BUILDING.add(active_folder)
 
     p = C_DefineParser.Parser()
+    p.recurse_submodule = Setting.Cdf_RecurseSubmodules
 
     # TODO: available to switch configuration
     predefines = _get_configs_from_compile_flags(active_folder)
