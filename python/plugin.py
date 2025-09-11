@@ -116,7 +116,7 @@ def _init_parser():
     print("init_parser %r" % active_folder)
 
     cache_file = _get_cache_file_for_folder(active_folder)
-    
+
     def async_proc():
         try:
             with open(cache_file, "rb") as fs:
@@ -148,8 +148,10 @@ def _make_new_parser(active_folder: str):
         p.insert_define(d[0], token=d[1])
 
     def dump_cache_file():
+        with p.pickable() as pp:
+            obj = pickle.dumps(pp)
         with open(_get_cache_file_for_folder(active_folder), "wb") as fs:
-            pickle.dump(p, fs)
+            fs.write(obj)
 
     def async_proc():
         p.read_folder_h(active_folder, Setting.Cdf_SupportHeaderExtensions)
