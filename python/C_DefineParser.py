@@ -513,7 +513,8 @@ class Parser:
             print(f"Fail to open :{filepath}. {e}")
         finally:
             for define in temp_defs:
-                del self.defs[define.name]
+                if define.name in self.defs:
+                    del self.defs[define.name]
                 self.cdef.del_name(define.name)
             # restore temp hidden
             for define in temp_hidden:
@@ -523,10 +524,10 @@ class Parser:
         if compile_flag_txt == "":
             return
 
-        arguments = [x.strip() for x in compile_flag_txt.split(" ") if x]
+        compile_flags = " ".join(compile_flag_txt.splitlines()).split(" ")
 
         predefines = []
-        for arg in arguments:
+        for arg in compile_flags:
             if not arg.startswith("-D"):
                 continue
 
