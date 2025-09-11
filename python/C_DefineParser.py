@@ -126,6 +126,8 @@ class CDefineEnv:
             pass
         except SyntaxError:
             pass
+        except TypeError:
+            pass
 
     def add_define(self, define: Define):
         if define.params is None:
