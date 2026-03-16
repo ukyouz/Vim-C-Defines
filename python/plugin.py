@@ -266,6 +266,8 @@ def command_rebuild_define_data(clean_rebuild=False):
 def command_mark_inactive_code():
     if Setting.Cdf_EnableGrayout:
         _mark_inactive_code(vim.current.buffer)
+    else:
+        _unmark_inactive_code(vim.current.buffer)
 
 
 def command_unmark_inactive_code():
